@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -26,12 +26,15 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
-      
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: node-app
-          path: .
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,17 +50,20 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_51CDB219D8D1401999B25EF595FF20ED }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D563D39FCFB247168D68F0B0231A9F41 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FCE6E116F02446198A0788764D2C88C7 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_583B031CEB5144D080659DD83DEE76B1 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2A49540410C74D92883932D12E13EAA6 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_71BC1A42CCD74859A94142D0D0C6B79B }}
 
       - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'my-book-store'
           slot-name: 'Production'
