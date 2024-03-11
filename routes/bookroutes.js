@@ -102,7 +102,12 @@ router.post("/signin", async (req, res) => {
     const passwordmatch = await user.comparePassword(password, user.password);
     if (passwordmatch) {
       const jwttoken = jwt.sign({ email: email }, process.env.PRIVATE_KEY);
-      res.cookie("uuid", jwttoken, { httpOnly: true });
+      res.cookie("uuid", jwttoken, {
+        maxAge: 20 * 24 * 60 * 60,
+        domain: "chimerical-puffpuff-55489b.netlify.app",
+        secure: true,
+        sameSite: 'none',
+      });
       res.status(200).json({ message: "User signed in" });
     }
     else {
