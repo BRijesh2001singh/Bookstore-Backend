@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 1000;
 require('dotenv').config();
 require("./connection/conncetion");
 app.use(cors({
-    origin: 'https://chimerical-puffpuff-55489b.netlify.app',
+    origin: 'http://localhost:3000',
     credentials: true,
 
 }))
