@@ -3,8 +3,6 @@ const bookmodel = require("../models/bookmodel");
 const usermodel = require("../models/user");
 const favourite = require("../models/favourite");
 const jwt = require("jsonwebtoken");
-const privatekey = "bookstore123";
-
 //POST REquest
 router.post("/add", async (req, res) => {
   try {
@@ -94,6 +92,7 @@ router.post("/register", async (req, res) => {
 //signin USERS
 router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
+  const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
   try {
     const user = await usermodel.findOne({ email });
     if (!user) {
@@ -102,7 +101,7 @@ router.post("/signin", async (req, res) => {
     const passwordmatch = await user.comparePassword(password, user.password);
     if (passwordmatch) {
       const jwttoken = jwt.sign({ email: email }, process.env.PRIVATE_KEY);
-      res.cookie("uuid", jwttoken, { sameSite: "none", secure: true });
+      res.cookie("uuid", jwttoken, { sameSite: "none", secure: true, expires: expirationDate });
       res.status(200).json({ message: "User signed in" });
     }
     else {
