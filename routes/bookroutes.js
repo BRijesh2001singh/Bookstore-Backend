@@ -1,12 +1,9 @@
 const router = require("express").Router();
-const NodeCache = require("node-cache")
 const bookmodel = require("../models/bookmodel");
 const usermodel = require("../models/user");
 const favourite = require("../models/favourite");
 const jwt = require("jsonwebtoken");
-const nodeCache = new NodeCache({
-  stdTTL: 10000
-})
+
 router.get("/health", async (req, res) => {
   res.send(200);
 })
@@ -17,7 +14,6 @@ router.post("/add", async (req, res) => {
     const newBook = new bookmodel(data);
     await newBook.save().then(() => {
       res.status(200).json({ message: "Book Added successfully" });
-      nodeCache.del("books")
     });
   }
   catch (error) {
@@ -26,20 +22,13 @@ router.post("/add", async (req, res) => {
 })
 //Get request
 router.get("/get", async (req, res) => {
-  let books;
-  if (nodeCache.has("books")) {
-    books = JSON.parse(nodeCache.get("books"));
-    res.send(books);
+
+  try {
+    books = await bookmodel.find();
+    res.status(200).json({ books });
   }
-  else {
-    try {
-      books = await bookmodel.find();
-      nodeCache.set("books", JSON.stringify(books));
-      res.status(200).json({ books });
-    }
-    catch (error) {
-      console.log(error);
-    }
+  catch (error) {
+    console.log(error);
   }
 });
 //Get request for user profile
@@ -84,7 +73,6 @@ router.delete("/deleteBook/:id", async (req, res) => {
   const id = req.params.id;
   try {
     await bookmodel.findByIdAndDelete(id).then(() => res.status(201).json({ message: "Book Deleted" }));
-    nodeCache.del("books")
   }
   catch (error) {
     console.log(error);
