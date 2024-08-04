@@ -6,10 +6,10 @@ const PORT = process.env.PORT || 5000;
 require('dotenv').config();
 require("./connection/conncetion");
 app.use(cors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-
-}))
+  origin: '*', // Allow requests from any domain
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 app.use(express.json());
 app.use("/api/v1/", bookroute);
 app.listen(PORT, () => {
