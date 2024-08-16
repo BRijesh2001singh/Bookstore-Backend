@@ -12,7 +12,7 @@ const cookieOptions = {
   secure: true,
   expires: expirationDate,
   // domain: 'localhost'
-  domain: 'bookspedia55.netlify'
+  domain: 'bookspedia55.netlify.app'
 };
 
 //health
