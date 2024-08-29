@@ -4,7 +4,7 @@ const usermodel = require("../models/user");
 const favourite = require("../models/favourite");
 const reviewmodel = require('../models/review');
 const jwt = require("jsonwebtoken");
-
+const redis = require("../redis/redisClient.js");
 //cookie settings
 const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
@@ -19,11 +19,12 @@ const cookieOptions = {
 router.get("/health", async (req, res) => {
   res.send(200);
 })
-//POST REquest
+//add boook REquest
 router.post("/add", async (req, res) => {
   try {
     const data = req.body;
     const newBook = new bookmodel(data);
+    await redis.del('books');
     await newBook.save().then(() => {
       res.status(200).json({ message: "Book Added successfully" });
     });
@@ -34,9 +35,14 @@ router.post("/add", async (req, res) => {
 })
 //Get request
 router.get("/get", async (req, res) => {
+  const cachedValue = await redis.get('books');
+  if (cachedValue) {
 
+    return res.status(200).json({ books: JSON.parse(cachedValue) });
+  }
   try {
     books = await bookmodel.find();
+    await redis.set('books', JSON.stringify(books), 'EX', 300)
     res.status(200).json({ books });
   }
   catch (error) {
@@ -155,6 +161,7 @@ router.patch("/:userId/addfavbook", async (req, res) => {
       await newuserfav.save();
     }
     //this is when user is already present
+    await redis.del(`favbook-${userId}`);
     const updatedFavbooks = await favourite.findOneAndUpdate({ userId }, { $push: { favbookId: newfavbookId } }, { new: true });
     res.status(200).json({ favbookId: updatedFavbooks.favbookId });
 
@@ -168,6 +175,7 @@ router.delete("/:userId/deletefavbook", async (req, res) => {
   const favbookId = req.body.favbookId;
   try {
     await favourite.findOneAndUpdate({ userId }, { $pull: { favbookId: favbookId } }, { new: true });
+    await redis.del(`favbook-${userId}`);
     res.status(200).json({ message: "Book Removed" });
   } catch (err) {
     console.log(err);
@@ -177,9 +185,14 @@ router.delete("/:userId/deletefavbook", async (req, res) => {
 router.get("/:userId/getfavbook", async (req, res) => {
   userId = req.params.userId;
   try {
+    const cachedValue = await redis.get(`favbook-${userId}`);
+    if (cachedValue) {
+      return res.status(200).json({ favbooklist: JSON.parse(cachedValue) });
+    }
     const favbook = await favourite.findOne({ userId }).populate({ path: "favbookId", select: "bookname author readonline" });
     if (!favbook) return res.json({ message: "No favourite books" });
     const favbooklist = favbook.favbookId || [];
+    await redis.set(`favbook-${userId}`, JSON.stringify(favbooklist), 'EX', 600);
     res.status(200).json({ favbooklist });
   }
   catch (err) {
