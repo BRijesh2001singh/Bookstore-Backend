@@ -37,16 +37,18 @@ router.post("/add", async (req, res) => {
 router.get("/get", async (req, res) => {
   const cachedValue = await redis.get('books');
   if (cachedValue) {
-
+    console.log("redis sent me this")
     return res.status(200).json({ books: JSON.parse(cachedValue) });
   }
-  try {
-    books = await bookmodel.find();
-    await redis.set('books', JSON.stringify(books), 'EX', 300)
-    res.status(200).json({ books });
-  }
-  catch (error) {
-    console.log(error);
+  else {
+    try {
+      books = await bookmodel.find();
+      await redis.set('books', JSON.stringify(books), 'EX', 300)
+      res.status(200).json({ books });
+    }
+    catch (error) {
+      console.log(error);
+    }
   }
 });
 //Get request for user profile
