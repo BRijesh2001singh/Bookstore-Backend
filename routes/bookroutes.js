@@ -10,9 +10,7 @@ const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
   sameSite: "None",
   secure: true,
-  expires: expirationDate,
-  // domain: 'localhost'
-  domain: 'bookspedia55.netlify.app'
+  expires: expirationDate
 };
 
 //health
