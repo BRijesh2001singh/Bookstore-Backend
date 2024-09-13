@@ -8,9 +8,9 @@ const redis = require("../redis/redisClient.js");
 //cookie settings
 const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
-  sameSite: "None",
+  SameSite: "None",
   secure: true,
-  domain: ".netlify.app",
+  domain: "https://book-store-gilt-three.vercel.app/",
   expires: expirationDate,
 };
 
