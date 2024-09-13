@@ -10,7 +10,6 @@ const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
   SameSite: "None",
   secure: true,
-  domain: "https://book-store-gilt-three.vercel.app/",
   expires: expirationDate,
 };
 
