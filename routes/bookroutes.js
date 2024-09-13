@@ -11,7 +11,7 @@ const cookieOptions = {
   sameSite: "None",
   secure: true,
   httpOnly: false,
-  domain: ".netlify.app",
+  domain: "chimerical-puffpuff-55489b.netlify.app",
   expires: expirationDate
 };
 
