@@ -8,7 +8,7 @@ const redis = require("../redis/redisClient.js");
 //cookie settings
 const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
-  SameSite: "None",
+  sameSite: "None",
   secure: true,
   expires: expirationDate,
 };
