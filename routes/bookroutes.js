@@ -264,7 +264,7 @@ router.get("/readblogs", async (req, res) => {
       }
       else {
         await redis.set('blogs', JSON.stringify(allblogs), 'EX', 300);
-        res.json(allblogs);
+        return res.json({ blogs: allblogs });
       }
     }
   } catch (error) {
