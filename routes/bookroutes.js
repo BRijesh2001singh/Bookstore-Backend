@@ -5,6 +5,7 @@ const favourite = require("../models/favourite");
 const reviewmodel = require('../models/review');
 const jwt = require("jsonwebtoken");
 const redis = require("../redis/redisClient.js");
+const blogsmodel = require("../models/blogs.js");
 //cookie settings
 const expirationDate = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000);
 const cookieOptions = {
@@ -35,7 +36,7 @@ router.post("/add", async (req, res) => {
 router.get("/get", async (req, res) => {
   const cachedValue = await redis.get('books');
   if (cachedValue) {
-    console.log("redis sent me this")
+
     return res.status(200).json({ books: JSON.parse(cachedValue) });
   }
   else {
@@ -212,13 +213,13 @@ router.post("/:userId/addreview/:bookId", async (req, res) => {
       review
     })
     await newreview.save();
-    res.status(201).send({ message: "Review added successfully", review: newreview });
+    return res.status(201).send({ message: "Review added successfully", review: newreview });
 
   } catch (error) {
     res.status(500).send({ message: "An error occured" });
   }
 })
-
+//get book review
 router.get('/reviews/:bookId', async (req, res) => {
   try {
     const { bookId } = req.params;
@@ -233,3 +234,41 @@ router.get('/reviews/:bookId', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+//post blogs
+router.post("/postblogs", async (req, res) => {
+  try {
+    const { userId, title, blog, tag } = req.body;
+    const newBlog = new blogsmodel({
+      userId,
+      title,
+      blog,
+      tag
+    })
+    await newBlog.save();
+    await redis.del('blogs');
+    return res.status(201).json({ message: "blog added" });
+  } catch (error) {
+    res.status(500).send({ message: "An error occured" });
+  }
+})
+router.get("/readblogs", async (req, res) => {
+  try {
+    const cachedValue = await redis.get('blogs');
+    if (cachedValue) {
+      return res.status(200).json({ blogs: JSON.parse(cachedValue) });
+    }
+    else {
+      const allblogs = await blogsmodel.find().populate('userId', 'name');
+      if (!allblogs.length) {
+        return res.status(404).json({ message: 'No blogs found' });
+      }
+      else {
+        await redis.set('blogs', JSON.stringify(allblogs), 'EX', 300);
+        res.json(allblogs);
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+})

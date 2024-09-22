@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const bookroute = require("./routes/bookroutes");
 const cors = require('cors');
-const PORT = process.env.PORT || 8000;
+const PORT = 8080 || process.env.PORT;
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
 require("./connection/conncetion");
